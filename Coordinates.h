@@ -5,19 +5,25 @@
 #define NULL 0
 #endif
 
+#include <vector>
+#include <cmath>
+#include <iostream>
+#include <sstream>
+#include <unordered_map>
+
 using namespace std;
 
 class Coordinates {
 	public:
-		int longitude;
-		int latitude;
+		float longitude;
+		float latitude;
 
-		Coordinates(int lo, int la) {
+		Coordinates(float lo, float la) {
 			longitude = lo;
 			latitude = la;
 		}
 
-		string toString() {
+		string toString() const {
 			stringstream s;
 			s << "(";
 			s << longitude;
@@ -28,6 +34,8 @@ class Coordinates {
 			return s.str();
 		}
 
-}
+};
+
+bool readUnorderedMapFromFile(unordered_map<string, Coordinates*> & m, char * fileName);
 
 #endif // COORDINATES_H_
