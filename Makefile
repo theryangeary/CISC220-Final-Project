@@ -8,7 +8,7 @@ INCLUDES =
 # force clean build every time
 all: clean main
 
-main: Graph.o Coordinates.o main.o
+main: Graph.o Coordinates.o CourseSection.o main.o
 	$(CXX) $^ -o $@
 
 # name a variable cources for all source files

@@ -5,6 +5,7 @@
 #include <stack>
 #include "Graph.h"
 #include "Coordinates.h"
+#include "CourseSection.h"
 
 using namespace std;
 
@@ -41,6 +42,7 @@ int main(int argc, char **argv) {
 	cout.precision(8);
 	cout << argv[1] << endl;
 	cout << argv[2] << endl;
+	cout << argv[3] << endl;
 
 	Graph g;
 	readDirectedGraphFromFile(g, argv[1]);
@@ -50,6 +52,13 @@ int main(int argc, char **argv) {
 	
 	readUnorderedMapFromFile(locations, argv[2]);
 	for (auto iter = locations.begin(); iter != locations.end(); ++iter) {
+		cout << iter->first << ": " << iter->second->toString();
+	}
+
+	unordered_map<std::string, CourseSection*> courseSections;	
+	readCourseSectionMapFromFile(courseSections, argv[3]);
+
+	for (auto iter = courseSections.begin(); iter != courseSections.end(); ++iter) {
 		cout << iter->first << ": " << iter->second->toString();
 	}
 
