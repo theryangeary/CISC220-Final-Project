@@ -15,16 +15,17 @@ using namespace std;
 
 class Coordinates {
 	public:
-		float longitude;
-		float latitude;
+		double longitude;
+		double latitude;
 
-		Coordinates(float lo, float la) {
+		Coordinates(double lo, double la) {
 			longitude = lo;
 			latitude = la;
 		}
 
 		string toString() const {
 			stringstream s;
+			s.precision(8);
 			s << "(";
 			s << longitude;
 			s << ", ";

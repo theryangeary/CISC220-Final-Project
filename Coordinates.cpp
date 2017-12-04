@@ -63,7 +63,13 @@ bool readUnorderedMapFromFile(std::unordered_map<std::string, Coordinates*> & m,
     }
     else if (numCoordinates > 0) {
       string label = row[0];
-      Coordinates * c = new Coordinates(atof(row[1].c_str()), atof(row[2].c_str()));
+      double lon;
+      double lat;
+      sscanf(row[1].c_str(), "%lf", &lon);
+      sscanf(row[2].c_str(), "%lf", &lat);
+      double a = 39.123456789;
+
+      Coordinates * c = new Coordinates(lon, lat);
       std::pair<string, Coordinates*> location (label, c);
       m.insert(location); 
       numCoordinates--;
