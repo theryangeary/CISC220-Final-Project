@@ -42,21 +42,19 @@ int main(int argc, char **argv) {
 	cout.precision(8);
 	cout << argv[1] << endl;
 	cout << argv[2] << endl;
-	cout << argv[3] << endl;
 
 	Graph g;
-	readDirectedGraphFromFile(g, argv[1]);
-	cout << g.toString();
+	// turn this into a graph using the locations and courseSections hash maps below
 
 	unordered_map<std::string, Coordinates*> locations;
 	
-	readUnorderedMapFromFile(locations, argv[2]);
+	readUnorderedMapFromFile(locations, argv[1]);
 	for (auto iter = locations.begin(); iter != locations.end(); ++iter) {
 		cout << iter->first << ": " << iter->second->toString();
 	}
 
 	unordered_map<std::string, CourseSection*> courseSections;	
-	readCourseSectionMapFromFile(courseSections, argv[3]);
+	readCourseSectionMapFromFile(courseSections, argv[2]);
 
 	for (auto iter = courseSections.begin(); iter != courseSections.end(); ++iter) {
 		cout << iter->first << ": " << iter->second->toString();
