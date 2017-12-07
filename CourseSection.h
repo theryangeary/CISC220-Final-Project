@@ -32,11 +32,14 @@ public:
         location = l;
     }
     
+    bool startsAfter(CourseSection * cs) {
+	return (startTime > cs->endTime) || (days[0] == 'T' && cs->days[0] == 'M');
+    }
+    
     string toString() const {
         stringstream s;
         s << "(";
         s << course;
-        s << "-";
         s << section;
         s << ", ";
         s << startTime;
@@ -47,7 +50,6 @@ public:
         s << ", ";
         s << location;
         s << ")";
-        s<< endl;
         return s.str();
     }
 

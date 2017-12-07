@@ -17,9 +17,6 @@ float distance(Coordinates* c1, Coordinates* c2) {
 	double dlon1 = c1->longitude * (PI/180);
 	double dlon2 = c2->longitude * (PI/180);
 
-	cout << dlat1 << ", " << dlon1 << " to " << dlat2 << ", " <<dlon2 << endl;
-	cout << c1->latitude << ", " << c1->longitude << " to " << c2->latitude << ", " << c2->longitude<< endl;
-
 	double delLon = dlon1 - dlon2;
 	double delLat = dlat1 - dlat2;
 
@@ -33,6 +30,27 @@ float distance(Coordinates* c1, Coordinates* c2) {
 	return distance;
 }
 
+
+bool createDirectedGraph(Graph & g, unordered_map<std::string, Coordinates*> locations, unordered_map<std::string, CourseSection*> courseSections) {
+	for (auto it : courseSections) {
+		g.vertices[it.first] = new Vertex(g.vertices.size(), it.first);		
+	}
+	
+	for (auto v : g.vertices) {
+		for (auto otherV : g.vertices) {
+			if (courseSections[v.second->label]->course !=
+			    courseSections[otherV.second->label]->course &&
+			    courseSections[otherV.second->label]->startsAfter(
+				    courseSections[v.second->label])) {
+				v.second->edges.push_back(new Edge(v.second, otherV.second, distance(
+								locations[courseSections[v.second->label]->location], locations[courseSections[otherV.second->label]->location])));
+			}
+			if (otherV.second->label == v.second->label) {
+				cout << "We got one" << endl;	
+			}
+		}
+	}
+}
 
 int findShortestPath(Graph & g) {
 	return pow(2, 32) - 1;
@@ -57,8 +75,13 @@ int main(int argc, char **argv) {
 	readCourseSectionMapFromFile(courseSections, argv[2]);
 
 	for (auto iter = courseSections.begin(); iter != courseSections.end(); ++iter) {
-		cout << iter->first << ": " << iter->second->toString();
+		cout << iter->first << ": " << iter->second->toString() << endl;
 	}
+
+	createDirectedGraph(g, locations, courseSections);
+	
+
+	cout << g.toString() << endl;
 
 	cout << "The class schedule that requires the minimum distance travelled is " << findShortestPath(g) << endl;
 

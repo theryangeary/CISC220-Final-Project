@@ -9,7 +9,6 @@
 #include <vector>
 #include <limits>
 
-
 using namespace std;
 
 void line_populate(vector<string> &record, const string& line, char delimiter) {
@@ -89,3 +88,5 @@ bool readDirectedGraphFromFile(Graph & g, char * fileName) {
 
   return true;
 }
+
+

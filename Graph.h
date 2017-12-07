@@ -92,5 +92,6 @@ class Graph {
 };
 
 bool readDirectedGraphFromFile(Graph & g, char * fileName);
+//bool createDirectedGraph(Graph & g, unordered_map<std::string, Coordinates*> locations, unordered_map<std::string, CourseSection*> courseSections);
 
 #endif // GRAPH_H_
