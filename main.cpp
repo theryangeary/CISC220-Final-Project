@@ -1,11 +1,15 @@
+#include <cstring>
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
 #include <limits>
+#include <algorithm>
 #include <stack>
 #include "Graph.h"
 #include "Coordinates.h"
 #include "CourseSection.h"
+
+#define NUM_COURSES_PER_SEMESTER 5
 
 using namespace std;
 
@@ -25,13 +29,22 @@ float distance(Coordinates* c1, Coordinates* c2) {
 
 	const double earthRadius = 3963.19;
 
-	double distance = earthRadius*cHarv;
-
-	return distance;
+	double result = earthRadius*cHarv;
+	return fabs(result);
 }
 
+float distanceBetweenBuildings(
+		string building1, 
+		string building2, 
+		unordered_map<string, Coordinates*> locations) {
+	//cout << distance(locations[building1], locations[building2]) << endl;
+	return distance(locations[building1], locations[building2]);
+}
 
-bool createDirectedGraph(Graph & g, unordered_map<std::string, Coordinates*> locations, unordered_map<std::string, CourseSection*> courseSections) {
+bool createDirectedGraph(
+		Graph & g, 
+		unordered_map<std::string, Coordinates*> locations, 
+		unordered_map<std::string, CourseSection*> courseSections) {
 	for (auto it : courseSections) {
 		g.vertices[it.first] = new Vertex(g.vertices.size(), it.first);		
 	}
@@ -42,48 +55,234 @@ bool createDirectedGraph(Graph & g, unordered_map<std::string, Coordinates*> loc
 			    courseSections[otherV.second->label]->course &&
 			    courseSections[otherV.second->label]->startsAfter(
 				    courseSections[v.second->label])) {
-				v.second->edges.push_back(new Edge(v.second, otherV.second, distance(
-								locations[courseSections[v.second->label]->location], locations[courseSections[otherV.second->label]->location])));
-			}
-			if (otherV.second->label == v.second->label) {
-				cout << "We got one" << endl;	
+				v.second->edges.push_back(
+						new Edge(
+							v.second, 
+							otherV.second, 
+							distance(
+								locations[courseSections[v.second->label]->location], 
+								locations[courseSections[otherV.second->label]->location])));
 			}
 		}
 	}
 }
 
-int findShortestPath(Graph & g) {
-	return pow(2, 32) - 1;
+bool isInside(string str, char c)
+{
+	return str.find(c) != std::string::npos;
 }
+
+string scheduleToString(vector<string> & classesInThisSchedule);
+
+float findPathLength(
+		vector<string> & classesInThisSchedule, 
+		unordered_map<string, Coordinates *> locations, 
+		unordered_map<string, CourseSection *> courseSections, 
+		string placeOfResidence) {
+	float totalDistance = 0.0;
+	char currentDay = 'M'; //;
+	string currentLocation = placeOfResidence;
+	while (currentDay != 'S') {
+		for (auto courseSection : classesInThisSchedule) {
+			//if (courseSections[courseSection]->days[0] != currentDay) {
+			//	totalDistance += distanceBetweenBuildings(
+			//			placeOfResidence, 
+			//			courseSections[courseSection]->location, 
+			//			locations);
+			//}
+			//cout << "distance from " << currentLocation << " to " << courseSections[courseSection]->location << ": " << distanceBetweenBuildings(
+			//		currentLocation,
+			//		courseSections[courseSection]->location,
+			//	locations)
+//<< endl;
+			if (isInside(courseSections[courseSection]->days, currentDay)) {
+				totalDistance += distanceBetweenBuildings(
+					currentLocation,
+					courseSections[courseSection]->location,
+				locations);
+				currentLocation = courseSections[courseSection]->location;
+			}
+		}
+		totalDistance += distanceBetweenBuildings(
+			currentLocation,
+			placeOfResidence,
+			locations);
+		currentLocation = placeOfResidence;
+		switch(currentDay) {
+			case 'M':
+				currentDay = 'T';
+				break;
+			case 'T':
+				currentDay = 'W';
+				break;
+			case 'W':
+				currentDay = 'R';
+				break;
+			case 'R':
+				currentDay = 'F';
+				break;
+			case 'F':
+				currentDay = 'S';
+				break;
+			default:
+				currentDay = 'S';
+				break;
+		}
+	}
+	//cout << "Path " << scheduleToString(classesInThisSchedule) << " length: " << totalDistance << endl;
+	return totalDistance;
+	
+}
+
+bool labelInList(string word, vector<string> & lst) {
+	bool result = false;
+	for (auto i : lst) {
+		result = result | 0 == strcmp(
+				word.substr(0, 7).c_str(), 
+				i.substr(0, 7).c_str());
+	}
+	return result;
+}
+
+string scheduleToString(vector<string> & classesInThisSchedule) {
+	stringstream s;
+	for (auto i : classesInThisSchedule) {
+		s << i;
+		s << ", ";
+	}
+	return s.str();
+
+}
+
+float shortestScheduleStartingAtVertex(
+		Vertex * v, 
+		vector<string> & classesInThisSchedule, 
+		vector<string> & classesInShortestSchedule, 
+		float runningMin, 
+		unordered_map<string, Coordinates *> locations, 
+		unordered_map<string, CourseSection *> courseSections, 
+		string placeOfResidence) {
+	//cout << "At vertex: " << v->label << endl;
+	//cout << "runningMin: " << runningMin << endl;
+	for (auto e : v->edges) {
+		if (!labelInList(e->target->label, classesInThisSchedule)) {
+			classesInThisSchedule.push_back(e->target->label);
+			
+			if (classesInThisSchedule.size() == NUM_COURSES_PER_SEMESTER) {
+	//cout << "Course list is: " << classesInThisSchedule.size()<< ": "  << scheduleToString(classesInThisSchedule) << endl;
+				float x = findPathLength(
+						classesInThisSchedule, 
+						locations, 
+						courseSections, 
+						placeOfResidence);
+				if (x < runningMin) {
+					//cout << "old shortest path: " << runningMin << endl;
+					//cout << "new shortest path: " << x << endl;
+					runningMin = x;
+					classesInShortestSchedule = classesInThisSchedule;
+				}
+			} else {
+				runningMin = shortestScheduleStartingAtVertex(
+						e->target, 
+						classesInThisSchedule, 
+						classesInShortestSchedule, 
+						runningMin, 
+						locations, 
+						courseSections, 
+						placeOfResidence);
+			}
+			classesInThisSchedule.pop_back();
+		}
+	}
+	//cout << "end foreach" << endl;
+	return runningMin;
+}
+
+float findShortestPath(
+		Graph & g, 
+		unordered_map<string, Coordinates*> & locations, 
+		unordered_map<string, CourseSection*> & courseSections, 
+		vector<string> & classesInShortestSchedule, 
+		string placeOfResidence) {
+	vector<string> classesInThisSchedule;
+	float minWalkingDistance = numeric_limits<float>::max();
+
+	for (auto v : g.vertices) {
+		//cout << "Starting at vertex: " << v.second->label << ", the shortest path is:" ; 
+		classesInThisSchedule.push_back(v.second->label);
+		float distance = shortestScheduleStartingAtVertex(
+				v.second, 
+				classesInThisSchedule, 
+				classesInShortestSchedule, 
+				numeric_limits<float>::max(), 
+				locations, 
+				courseSections, 
+				placeOfResidence);
+		//cout << distance << endl;
+		if (distance < minWalkingDistance) {
+			minWalkingDistance = distance;
+			classesInShortestSchedule = classesInThisSchedule;
+		}	
+		classesInThisSchedule.pop_back();
+	}
+
+	return minWalkingDistance;
+}
+
 
 int main(int argc, char **argv) {
 	cout.precision(8);
-	cout << argv[1] << endl;
-	cout << argv[2] << endl;
+
+	string placeOfResidence = argv[3];
+	 
+	bool verbose = (argc > 4);
 
 	Graph g;
-	// turn this into a graph using the locations and courseSections hash maps below
+
+	if (verbose) {
+		cout << argv[1] << endl;
+		cout << argv[2] << endl;
+		cout << argv[3] << endl;
+		cout << endl;
+	}
 
 	unordered_map<std::string, Coordinates*> locations;
 	
 	readUnorderedMapFromFile(locations, argv[1]);
-	for (auto iter = locations.begin(); iter != locations.end(); ++iter) {
-		cout << iter->first << ": " << iter->second->toString();
+	if (verbose) {
+		for (auto iter = locations.begin(); iter != locations.end(); ++iter) {
+			cout << iter->first << ": " << iter->second->toString();
+		}
 	}
 
 	unordered_map<std::string, CourseSection*> courseSections;	
 	readCourseSectionMapFromFile(courseSections, argv[2]);
 
-	for (auto iter = courseSections.begin(); iter != courseSections.end(); ++iter) {
-		cout << iter->first << ": " << iter->second->toString() << endl;
+	if (verbose) {
+		for (auto iter = courseSections.begin(); iter != courseSections.end(); ++iter) {
+			cout << iter->first << ": " << iter->second->toString() << endl;
+		}
 	}
 
 	createDirectedGraph(g, locations, courseSections);
 	
 
-	cout << g.toString() << endl;
+	if (verbose) {
+		cout << g.toString() << endl;
+	}
 
-	cout << "The class schedule that requires the minimum distance travelled is " << findShortestPath(g) << endl;
+	vector<string> classesInShortestSchedule;
+
+
+	float distanceWalked = findShortestPath(
+			g, 
+			locations, 
+			courseSections, 
+			classesInShortestSchedule, 
+			placeOfResidence);
+	cout << "The class schedule that requires the minimum distance travelled is " << 
+		scheduleToString(classesInShortestSchedule) << endl;
+	cout << "This schedule requires walking " << distanceWalked << " miles." << endl;
 
 	return 0;
 }
