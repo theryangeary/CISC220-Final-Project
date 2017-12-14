@@ -8,5 +8,7 @@ make
 ```
 To run the project, run 
 ```
-./main locations.txt classsections.txt
+./main locations.txt classsections.txt <residence hall>
 ```
+Optionally, add "verbose" to the end of the command to see the data structures used in detail.
+
