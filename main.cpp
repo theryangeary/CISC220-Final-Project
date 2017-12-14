@@ -154,6 +154,20 @@ string scheduleToString(vector<string> & classesInThisSchedule) {
 
 }
 
+bool noScheduleConflicts(
+		string courseSection, 
+		vector<string> classesInThisSchedule,
+		unordered_map<string, CourseSection *> courseSections) {
+	for (auto c : classesInThisSchedule) {
+		if (courseSections[c]->startsAfter(courseSections[courseSection]) ||
+				courseSections[courseSection]->startsAfter(courseSections[c])) {
+
+		} else {
+			return false;
+		}
+	}
+}
+
 float shortestScheduleStartingAtVertex(
 		Vertex * v, 
 		vector<string> & classesInThisSchedule, 
@@ -165,7 +179,8 @@ float shortestScheduleStartingAtVertex(
 	//cout << "At vertex: " << v->label << endl;
 	//cout << "runningMin: " << runningMin << endl;
 	for (auto e : v->edges) {
-		if (!labelInList(e->target->label, classesInThisSchedule)) {
+		if (!labelInList(e->target->label, classesInThisSchedule) &&
+				noScheduleConflicts(e->target->label, classesInThisSchedule, courseSections)) {
 			classesInThisSchedule.push_back(e->target->label);
 			
 			if (classesInThisSchedule.size() == NUM_COURSES_PER_SEMESTER) {
@@ -288,9 +303,9 @@ int main(int argc, char **argv) {
 		scheduleToString(classesInShortestSchedule);
 	cout << "and this schedule requires walking " << distanceWalked << " miles." << endl;
 
-	//for (auto i: classesInShortestSchedule) {
-	//	cout << courseSections[i]->toString() << endl;
-	//}
+	for (auto i: classesInShortestSchedule) {
+		cout << courseSections[i]->toString() << endl;
+	}
 	
 	cout << findPathLength(
 		classesInShortestSchedule, locations, courseSections, placeOfResidence) << endl; 

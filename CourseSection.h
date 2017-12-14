@@ -33,6 +33,7 @@ public:
     }
     
     bool startsAfter(CourseSection * cs) {
+	    //cout << toString() << " starts after " << cs->toString() << ": " << ((startTime > cs->endTime) || (days[0] == 'T' && cs->days[0] == 'M')) << endl;
 	return (startTime > cs->endTime) || (days[0] == 'T' && cs->days[0] == 'M');
     }
     
