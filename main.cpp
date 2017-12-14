@@ -207,13 +207,14 @@ float findShortestPath(
 	vector<string> classesInThisSchedule;
 	float minWalkingDistance = numeric_limits<float>::max();
 
+	vector<string> tmpClassesInShortestSchedule;
 	for (auto v : g.vertices) {
 		//cout << "Starting at vertex: " << v.second->label << ", the shortest path is:" ; 
 		classesInThisSchedule.push_back(v.second->label);
 		float distance = shortestScheduleStartingAtVertex(
 				v.second, 
 				classesInThisSchedule, 
-				classesInShortestSchedule, 
+				tmpClassesInShortestSchedule, 
 				numeric_limits<float>::max(), 
 				locations, 
 				courseSections, 
@@ -221,7 +222,7 @@ float findShortestPath(
 		//cout << distance << endl;
 		if (distance < minWalkingDistance) {
 			minWalkingDistance = distance;
-			classesInShortestSchedule = classesInThisSchedule;
+			classesInShortestSchedule = tmpClassesInShortestSchedule;
 		}	
 		classesInThisSchedule.pop_back();
 	}
@@ -270,7 +271,6 @@ int main(int argc, char **argv) {
 
 	createDirectedGraph(g, locations, courseSections);
 	
-
 	if (verbose) {
 		cout << g.toString() << endl;
 	}
@@ -285,8 +285,14 @@ int main(int argc, char **argv) {
 			classesInShortestSchedule, 
 			placeOfResidence);
 	cout << "The class schedule that requires the minimum distance travelled is " << 
-		scheduleToString(classesInShortestSchedule) << endl;
-	cout << "This schedule requires walking " << distanceWalked << " miles." << endl;
+		scheduleToString(classesInShortestSchedule);
+	cout << "and this schedule requires walking " << distanceWalked << " miles." << endl;
 
+	//for (auto i: classesInShortestSchedule) {
+	//	cout << courseSections[i]->toString() << endl;
+	//}
+	
+	cout << findPathLength(
+		classesInShortestSchedule, locations, courseSections, placeOfResidence) << endl; 
 	return 0;
 }
