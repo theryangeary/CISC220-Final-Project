@@ -235,7 +235,11 @@ int main(int argc, char **argv) {
 
 	string placeOfResidence = argv[3];
 	 
-	bool verbose = (argc > 4);
+	bool verbose = false;
+	if (argc > 4) {
+		verbose = (strcmp(argv[4], "verbose") == 0);
+		verbose = verbose | strcmp(argv[4], "v") == 0;
+	}
 
 	Graph g;
 
