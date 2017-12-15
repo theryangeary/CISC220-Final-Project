@@ -307,7 +307,5 @@ int main(int argc, char **argv) {
 		cout << courseSections[i]->toString() << endl;
 	}
 	
-	cout << findPathLength(
-		classesInShortestSchedule, locations, courseSections, placeOfResidence) << endl; 
 	return 0;
 }
