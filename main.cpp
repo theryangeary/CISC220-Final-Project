@@ -190,6 +190,7 @@ float shortestScheduleStartingAtVertex(
 						locations, 
 						courseSections, 
 						placeOfResidence);
+				//cout << x << endl;
 				if (x < runningMin) {
 					//cout << "old shortest path: " << runningMin << endl;
 					//cout << "new shortest path: " << x << endl;
@@ -221,6 +222,7 @@ float findShortestPath(
 		string placeOfResidence) {
 	vector<string> classesInThisSchedule;
 	float minWalkingDistance = numeric_limits<float>::max();
+
 
 	vector<string> tmpClassesInShortestSchedule;
 	for (auto v : g.vertices) {
@@ -307,5 +309,8 @@ int main(int argc, char **argv) {
 		cout << courseSections[i]->toString() << endl;
 	}
 	
+
+	locations.clear();
+	courseSections.clear();
 	return 0;
 }
